@@ -1,50 +1,60 @@
 #include "treeHash.h"
 
-TreeHash::TreeHash(float C, int S, const std::vector<TreeHash::prob>& P_xy)
- : C(C), S(S), P_xy(P_xy){
-    //this->C = C;
-    //this->S = S;
-    //this->P_xy = P_xy;
+TreeHash::TreeHash(double C, int S, int M, int N, const TreeHash::prob& P_xy)
+ : C(C), S(S), N(N), M(M), P_xy(P_xy){
 
+    //Calculate Q_xy - assumes, x, y distributed independently
+    this->Q_xy[0][0] = (P_xy[0][0]+P_xy[0][1])*(P_xy[0][0]+P_xy[1][0]);
+    this->Q_xy[1][0] = (P_xy[1][0]+P_xy[1][1])*(P_xy[0][0]+P_xy[1][0]);
+    this->Q_xy[0][1] = (P_xy[0][0]+P_xy[0][1])*(P_xy[0][1]+P_xy[1][1]);
+    this->Q_xy[1][1] = (P_xy[1][0]+P_xy[1][1])*(P_xy[0][1]+P_xy[1][1]);
 
     //Construct the Hashing Tree
     root = new TreeNode();
     root->P_xy = 1.0;
-    
-    currBucketId = 0;
+    root->Q_xy = 1.0;
 
+    currBucketId = 0;
+    bucketProbSum = 0.0;
+    root->isBucket = false;
+    root->isReject = false;
+
+    //Start hashing recursively
     constructTree(root, 0);
-    std::cout << "Finished!" << std::endl;
+    std::cout << "Finished constructing tree" << std::endl;
     numBuckets = currBucketId;
 }
+TreeHash::~TreeHash(){
+  delete root;
+}
+
 
 void TreeHash::constructTree(TreeNode* node, int i)
 {
-    std::cout << "This ran" << i << std::endl;
+    //std::cout << "Depth" << i << std::endl;
     for(int x = 0; x < 2; x++){
         for(int y = 0; y < 2; y++){
-             if(node->P_xy*P_xy[i][x][y] > 1/C){
-                TreeNode* childNode = new TreeNode();
-                float p1 = node->P_xy*P_xy[i][x][y];
-                childNode->P_xy = p1;
-                node->child[x][y] = childNode;
-                if(i < S-1){
-                    //More bits remain, recurse
-                    constructTree(childNode, i+1);
-                } else {
-                    //Reached the end of the string, make a bucket
-                    std::cout << "Bucket " << currBucketId << std::endl;
-                    childNode->isBucket = true;
-                    childNode->bucketId = currBucketId;
-                    currBucketId++; 
-                }
+            TreeNode* childNode = new TreeNode();
+            childNode->P_xy = node->P_xy*P_xy[x][y];
+            childNode->Q_xy = node->Q_xy*Q_xy[x][y];
+            node->child[x][y] = childNode;
+            if(node->P_xy*P_xy[x][y] < 1/C) {
+                 //Prune the tree here, TreeHash::probability is too low
+                 //std::cout << "Prune! " << std::endl;
+                 childNode->isReject = true;
+             } else if(1+M*N*node->Q_xy < C*node->P_xy || i == S) {
+                //Make a bucket
+                //std::cout << "Bucket " << currBucketId << std::endl;
+                childNode->isBucket = true;
+                childNode->bucketId = currBucketId;
+                bucketProbSum += childNode->P_xy;
+                currBucketId++;
             } else {
-                //Prune the tree here, TreeHash::probability is too low
-                std::cout << "Prune! " << std::endl;
-                TreeNode* rejectNode = new TreeNode();
-                rejectNode->isReject = true;
-                node->child[x][y] = rejectNode;
-            }
+                 //regular child node
+                 childNode->isBucket = false;
+                 childNode->isReject = false;
+                 constructTree(childNode, i+1);
+             }
         }
     }
 }
@@ -58,8 +68,6 @@ void TreeHash::hash(std::vector<TreeHash::bitvec>& X,
     std::sort(Y.begin(), Y.end());
 
     //Make empty buckets
-    bucketsX->assign(numBuckets, std::vector<TreeHash::bitvec>());
-    bucketsY->assign(numBuckets, std::vector<TreeHash::bitvec>());
    
     auto X_begin = X.begin(); 
     auto X_end = X.end(); 
@@ -81,32 +89,40 @@ void TreeHash::hashRecursive(TreeNode* node,
                 std::vector<std::vector<TreeHash::bitvec>>* bucketsY,
                 int stringIndex) {
 
+    //std::cout << "hashRecursive X(" <<  X_begin-X.begin()  <<  " , " << X_end-X.begin()
+    //         << ") Y(" << Y_begin - Y.begin() << " , " << Y_end - Y.begin() << ") " << stringIndex << std::endl;
     //Base cases, bucket or reject:
     if(node->isBucket){
         //copy the remaining X, Y into the buckets
-        bucketsX->at(node->bucketId) = std::vector<TreeHash::bitvec>(X_begin, X_end);     
-        bucketsY->at(node->bucketId) = std::vector<TreeHash::bitvec>(Y_begin, Y_end);
+        //std::cout << "filled bucket #" << node->bucketId << " with "
+        //<< std::distance(X_begin, X_end)*std::distance(X_begin, X_end) << " pairs" << std::endl;
+        auto x = std::vector<TreeHash::bitvec>(X_begin, X_end);
+        auto y = std::vector<TreeHash::bitvec>(Y_begin, Y_end);
+
+        bucketsX->push_back(x);
+        bucketsY->push_back(y);
         return;
     }     
     if(node->isReject){
         return;
     }
-    if(stringIndex >= X[0].size()){
-        std::cout << "Error string len exceeded " << std::endl;
+    if(stringIndex >= X[0].vec.size()){
+        //std::cout << "Error string len exceeded " << std::endl;
         return;
     } 
     //Find first value in X, Y that starts with 1
-    std::vector<std::vector<bool>>::iterator X_mid;
-    std::vector<std::vector<bool>>::iterator Y_mid;
+    auto X_mid = X_begin;
+    auto Y_mid = Y_begin;
 
-    while(X_mid != X.end()) {
-        if((*X_mid)[stringIndex] == 1){
+    //could binary search here
+    while(X_mid != X_end) {
+        if((*X_mid).vec[stringIndex] == 1){
             break;
         }
         ++X_mid;
     }
-    while(Y_mid != Y.end()) {
-        if((*Y_mid)[stringIndex] == 1){
+    while(Y_mid != Y_end) {
+        if((*Y_mid).vec[stringIndex] == 1){
             break;
         }
          ++Y_mid;
@@ -118,7 +134,7 @@ void TreeHash::hashRecursive(TreeNode* node,
                       bucketsX, bucketsY, stringIndex+1); 
     }
     if(X_begin != X_mid && Y_end != Y_mid){
-        hashRecursive(node->child[0][1], X, Y, X_begin, X_mid, Y_mid, Y_end, 
+        hashRecursive(node->child[0][1], X, Y, X_begin, X_mid, Y_mid, Y_end,
                       bucketsX, bucketsY, stringIndex+1);
     }
     if(X_end != X_mid && Y_begin != Y_mid){

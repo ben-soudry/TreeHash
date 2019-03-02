@@ -3,25 +3,165 @@
 #include <algorithm>
 #include <random>
 #include <iostream>
+#include <math.h>
+#include <chrono>
+#include <memory>
+void testTreeHash(int S, int M, int N, double C, auto dice){
+  std::cout << "=============================================="<< std::endl;
+  std::cout << "Testing TreeHash with S = " << S << " N = " << N << " C = " << C << std::endl;
+  std::cout << "=============================================="<< std::endl;
+
+  auto startTime = std::chrono::system_clock::now();
+
+  TreeHash::prob P_xy;
+  P_xy[0] = {{ 0.215, 0.0025}};
+  P_xy[1] = {{0.255, 0.5275}};
+
+  TreeHash* treeHash = new TreeHash(C, S, M, N, P_xy);
+
+
+  std::vector<TreeHash::bitvec> X;
+  std::vector<TreeHash::bitvec> Y;
+
+  for(int i = 0; i < N; i++){
+    TreeHash::bitvec Xi;
+    TreeHash::bitvec Yi;
+    Xi.vec = std::vector<bool>(S, 0);
+    Yi.vec = std::vector<bool>(S, 0);
+    for(int j = 0; j < S; j++) {
+      //Give Xi, Yi a common id.
+      Xi.id = i;
+      Yi.id = i;
+      //Sample the bit
+      double R = dice();
+      if (R < P_xy[0][0]) {
+        Xi.vec[j] = 0;
+        Yi.vec[j] = 0;
+      } else if (R < P_xy[0][1] + P_xy[0][0]) {
+        Xi.vec[j] = 0;
+        Yi.vec[j] = 1;
+      } else if (R < P_xy[1][0] + P_xy[0][1] + P_xy[0][0]) {
+        Xi.vec[j] = 1;
+        Yi.vec[j] = 0;
+      } else {
+        Xi.vec[j] = 1;
+        Yi.vec[j] = 1;
+      }
+    }
+    X.push_back(Xi);
+    Y.push_back(Yi);
+  }
+  std::unique_ptr<std::vector<std::vector<TreeHash::bitvec>>> bucketsX(new std::vector<std::vector<TreeHash::bitvec>>);
+  std::unique_ptr<std::vector<std::vector<TreeHash::bitvec>>> bucketsY(new std::vector<std::vector<TreeHash::bitvec>>);
+  std::cout << "Hashing!" << std::endl;
+  treeHash->hash(X, Y, bucketsX.get(), bucketsY.get());
+
+  int matchedPairs = 0;
+  int unmatchedPairs = 0;
+  //Check all pairs in each bucket for matches:
+  for(int i = 0; i < (*bucketsX).size(); i++){
+    //compare all pairs in the ith bucket
+    for(int j = 0; j < (*bucketsX)[i].size(); j++){
+      for(int k = 0; k < (*bucketsY)[i].size(); k++){
+        if((*bucketsX)[i][j].id == (*bucketsY)[i][k].id){
+          matchedPairs += 1;
+        } else {
+          unmatchedPairs += 1;
+        }
+      }
+    }
+  }
+  auto endTime = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = endTime-startTime;
+
+
+  std::cout << "Time Elapsed: " << elapsed_seconds.count() << " seconds" << std::endl;
+  std::cout << "Matched Pairs: " << matchedPairs << std::endl;
+  std::cout << "Unmatched Pairs: " << unmatchedPairs << std::endl;
+  std::cout << "True Positive:" << ((double) matchedPairs) / ((double) N) << std::endl;
+
+  std::cout << "Probability Sum: "<< treeHash->bucketProbSum << std::endl;
+  std::cout << "(M+N)/C: "<< ((double)(M+N))/C << std::endl;
+
+  delete treeHash;
+}
 
 int main(){
-    int S = 12;
-    float C = 40;
+  int S = 2000;
 
-    std::vector<TreeHash::prob> P_xy(S);
-    TreeHash::prob testMatrix;
+  int M = 10000;
+  int N = 10000;
 
-    testMatrix[0] = {{0.9,0.1}};
-    testMatrix[1] = {{0.1,0.9}};
-    std::cout << testMatrix[0][0] << std::endl;
+  //Generate Random Samples:
+  std::random_device rd;  //Will be used to obtain a seed for the random number engine
 
-    for(auto it = P_xy.begin(); it != P_xy.end(); ++it){
-        *it  = testMatrix;
-    }
-    float wtf = P_xy.at(0)[0][0];
+  std::mt19937 gen(rd());
+  std::uniform_real_distribution<> dis(0, 1);
+  auto dice = std::bind (dis, gen);
 
-    TreeHash* t = new TreeHash(C, S, P_xy);
+  //M,N = 10^4
+  std::cout << "M,N = 10^4 " << std::endl;
 
+  double C = (double) N;
+  //testTreeHash(S, M, N, C, dice);
 
-    return 0;
+  C = (double) 10*N;
+  //testTreeHash(S, M, N, C, dice);
+
+  C = (double) 100*N;
+  testTreeHash(S, M, N, C, dice);
+
+  C = (double) 1000*N;
+  testTreeHash(S, M, N, C, dice);
+
+  C = (double) 10000*N;
+  testTreeHash(S, M, N, C, dice);
+
+  M = 100000;
+  N = 100000;
+  //M,N = 10^5
+  std::cout << "M,N = 10^5 " << std::endl;
+
+  C = (double) N;
+  testTreeHash(S, M, N, C, dice);
+
+  C = (double) 10*N;
+  testTreeHash(S, M, N, C, dice);
+
+  C = (double) 100*N;
+  testTreeHash(S, M, N, C, dice);
+
+  C = (double) 1000*N;
+  testTreeHash(S, M, N, C, dice);
+
+  C = (double) 10000*N;
+  testTreeHash(S, M, N, C, dice);
+
+  C = (double) 100000*N;
+  testTreeHash(S, M, N, C, dice);
+
+  M = 1000000;
+  N = 1000000;
+  //M,N = 10^6
+  std::cout << "M,N = 10^6 " << std::endl;
+  C = (double) N;
+  testTreeHash(S, M, N, C, dice);
+
+  C = (double) N*10;
+  testTreeHash(S, M, N, C, dice);
+
+  C = (double) N*100;
+  testTreeHash(S, M, N, C, dice);
+
+  C = (double) N*1000;
+  testTreeHash(S, M, N, C, dice);
+
+  C = (double) N*10000;
+  testTreeHash(S, M, N, C, dice);
+
+  C = (double) N*100000;
+  testTreeHash(S, M, N, C, dice);
+
+  C = (double) N*1000000;
+  testTreeHash(S, M, N, C, dice);
 }
