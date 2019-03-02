@@ -7,18 +7,27 @@
 #include <chrono>
 #include <memory>
 void testTreeHash(int S, int M, int N, double C, auto dice){
-  std::cout << "=============================================="<< std::endl;
+  std::cout << "========================================================"<< std::endl;
   std::cout << "Testing TreeHash with S = " << S << " N = " << N << " C = " << C << std::endl;
-  std::cout << "=============================================="<< std::endl;
+  std::cout << "========================================================"<< std::endl;
 
+
+  std::cout << "Constructing Tree" << std::endl;
   auto startTime = std::chrono::system_clock::now();
 
   TreeHash::prob P_xy;
   P_xy[0] = {{ 0.215, 0.0025}};
   P_xy[1] = {{0.255, 0.5275}};
 
+
   TreeHash* treeHash = new TreeHash(C, S, M, N, P_xy);
 
+  auto constructionTime = std::chrono::system_clock::now();
+  std::chrono::duration<double> construction_seconds = constructionTime-startTime;
+  std::cout << "Constructed Tree in "  << construction_seconds.count() << " seconds" << std::endl;
+
+  std::cout << "Generating Samples" << std::endl;
+  auto sampleStartTime = std::chrono::system_clock::now();
 
   std::vector<TreeHash::bitvec> X;
   std::vector<TreeHash::bitvec> Y;
@@ -51,9 +60,19 @@ void testTreeHash(int S, int M, int N, double C, auto dice){
     X.push_back(Xi);
     Y.push_back(Yi);
   }
+  auto sampleEndTime = std::chrono::system_clock::now();
+  std::chrono::duration<double> sample_seconds = sampleEndTime-sampleStartTime;
+  std::cout << "Generated Samples in "  << sample_seconds.count() << " seconds" << std::endl;
+
+  std::cout << "Hashing" << std::endl;
+  auto hashingStartTime = std::chrono::system_clock::now();
+
+
   std::unique_ptr<std::vector<std::vector<TreeHash::bitvec>>> bucketsX(new std::vector<std::vector<TreeHash::bitvec>>);
   std::unique_ptr<std::vector<std::vector<TreeHash::bitvec>>> bucketsY(new std::vector<std::vector<TreeHash::bitvec>>);
-  std::cout << "Hashing!" << std::endl;
+
+
+
   treeHash->hash(X, Y, bucketsX.get(), bucketsY.get());
 
   int matchedPairs = 0;
@@ -73,6 +92,9 @@ void testTreeHash(int S, int M, int N, double C, auto dice){
   }
   auto endTime = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed_seconds = endTime-startTime;
+
+  std::chrono::duration<double> hash_seconds = endTime-hashingStartTime;
+  std::cout << "Finished Hashing in "  << hash_seconds.count() << " seconds" << std::endl;
 
 
   std::cout << "Time Elapsed: " << elapsed_seconds.count() << " seconds" << std::endl;
@@ -109,13 +131,13 @@ int main(){
   //testTreeHash(S, M, N, C, dice);
 
   C = (double) 100*N;
-  testTreeHash(S, M, N, C, dice);
+ //testTreeHash(S, M, N, C, dice);
 
   C = (double) 1000*N;
-  testTreeHash(S, M, N, C, dice);
+  //testTreeHash(S, M, N, C, dice);
 
   C = (double) 10000*N;
-  testTreeHash(S, M, N, C, dice);
+  //testTreeHash(S, M, N, C, dice);
 
   M = 100000;
   N = 100000;

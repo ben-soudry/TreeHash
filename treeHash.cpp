@@ -110,11 +110,21 @@ void TreeHash::hashRecursive(TreeNode* node,
         //std::cout << "Error string len exceeded " << std::endl;
         return;
     } 
-    //Find first value in X, Y that starts with 1
-    auto X_mid = X_begin;
-    auto Y_mid = Y_begin;
+    //Find first value in X, Y that starts with 1 at string index
+    //auto X_mid = X_begin;
+    //auto Y_mid = Y_begin;
+    auto compareLambda = [=](const TreeHash::bitvec &a, const TreeHash::bitvec &b) -> bool
+    {
+      return a.vec[stringIndex] > b.vec[stringIndex];
+    };
+    TreeHash::bitvec one;
+    one.vec = std::vector<bool>(S, 0);
+    one.vec[stringIndex] = 1;
 
-    //could binary search here
+    auto X_mid = std::lower_bound(X_begin, X_end, one, compareLambda);
+    auto Y_mid = std::lower_bound(Y_begin, Y_end, one, compareLambda);
+
+    /*
     while(X_mid != X_end) {
         if((*X_mid).vec[stringIndex] == 1){
             break;
@@ -126,7 +136,7 @@ void TreeHash::hashRecursive(TreeNode* node,
             break;
         }
          ++Y_mid;
-    }
+    }*/
 
     //For each child, recurse using X0, X1, Y0, Y1 if data points remain
     if(X_begin != X_mid && Y_begin != Y_mid){        
