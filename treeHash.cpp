@@ -115,7 +115,7 @@ void TreeHash::hashRecursive(TreeNode* node,
     //auto Y_mid = Y_begin;
     auto compareLambda = [=](const TreeHash::bitvec &a, const TreeHash::bitvec &b) -> bool
     {
-      return a.vec[stringIndex] > b.vec[stringIndex];
+      return a.vec[stringIndex] < b.vec[stringIndex];
     };
     TreeHash::bitvec one;
     one.vec = std::vector<bool>(S, 0);

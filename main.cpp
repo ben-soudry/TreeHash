@@ -74,6 +74,12 @@ void testTreeHash(int S, int M, int N, double C, auto dice){
 
 
   treeHash->hash(X, Y, bucketsX.get(), bucketsY.get());
+  auto hashingEndTime = std::chrono::system_clock::now();
+  std::chrono::duration<double> hash_seconds = hashingEndTime-hashingStartTime;
+  std::cout << "Finished Hashing in "  << hash_seconds.count() << " seconds" << std::endl;
+
+  std::cout << "Matching Pairs" << std::endl;
+  auto matchingStartTime = std::chrono::system_clock::now();
 
   int matchedPairs = 0;
   int unmatchedPairs = 0;
@@ -90,12 +96,15 @@ void testTreeHash(int S, int M, int N, double C, auto dice){
       }
     }
   }
+
+
+
+
   auto endTime = std::chrono::system_clock::now();
+  std::chrono::duration<double> matching_seconds = endTime-matchingStartTime;
+  std::cout << "Finished Matching in "  << matching_seconds.count() << " seconds" << std::endl;
+
   std::chrono::duration<double> elapsed_seconds = endTime-startTime;
-
-  std::chrono::duration<double> hash_seconds = endTime-hashingStartTime;
-  std::cout << "Finished Hashing in "  << hash_seconds.count() << " seconds" << std::endl;
-
 
   std::cout << "Time Elapsed: " << elapsed_seconds.count() << " seconds" << std::endl;
   std::cout << "Matched Pairs: " << matchedPairs << std::endl;
@@ -125,19 +134,19 @@ int main(){
   std::cout << "M,N = 10^4 " << std::endl;
 
   double C = (double) N;
-  //testTreeHash(S, M, N, C, dice);
+  testTreeHash(S, M, N, C, dice);
 
   C = (double) 10*N;
-  //testTreeHash(S, M, N, C, dice);
+  testTreeHash(S, M, N, C, dice);
 
   C = (double) 100*N;
- //testTreeHash(S, M, N, C, dice);
+  testTreeHash(S, M, N, C, dice);
 
   C = (double) 1000*N;
-  //testTreeHash(S, M, N, C, dice);
+  testTreeHash(S, M, N, C, dice);
 
   C = (double) 10000*N;
-  //testTreeHash(S, M, N, C, dice);
+  testTreeHash(S, M, N, C, dice);
 
   M = 100000;
   N = 100000;
