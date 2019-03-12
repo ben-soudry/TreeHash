@@ -6,9 +6,9 @@
 #include <math.h>
 #include <chrono>
 #include <memory>
-void testTreeHash(int S, int M, int N, double C){
+void testTreeHash(int S, int M, int N, double C, int b){
   std::cout << "========================================================"<< std::endl;
-  std::cout << "Testing TreeHash with S = " << S << " N = " << N << " C = " << C << std::endl;
+  std::cout << "Testing TreeHash with S = " << S << " N = " << N << " C = " << C << " b = " << b << std::endl;
   std::cout << "========================================================"<< std::endl;
 
 
@@ -81,7 +81,7 @@ void testTreeHash(int S, int M, int N, double C){
 
 
 
-  treeHash->hash(X, Y, bucketsX.get(), bucketsY.get());
+  treeHash->hash(X, Y, bucketsX.get(), bucketsY.get(), b);
   auto hashingEndTime = std::chrono::system_clock::now();
   std::chrono::duration<double> hash_seconds = hashingEndTime-hashingStartTime;
   std::cout << "Finished Hashing in "  << hash_seconds.count() << " seconds" << std::endl;
@@ -130,23 +130,31 @@ int main(){
 
   int M = 10000;
   int N = 10000;
+  double C;
+  int b;
+
   //M,N = 10^4
   std::cout << "M,N = 10^4 " << std::endl;
 
-  double C = (double) N;
-  testTreeHash(S, M, N, C);
+  C = (double) N;
+  b = 100;
+  testTreeHash(S, M, N, C, b);
 
   C = (double) 10*N;
-  testTreeHash(S, M, N, C);
+  b = 100;
+  testTreeHash(S, M, N, C, b);
 
   C = (double) 100*N;
-  testTreeHash(S, M, N, C);
+  b = 37;
+  testTreeHash(S, M, N, C, b);
 
+  b = 2;
   C = (double) 1000*N;
-  testTreeHash(S, M, N, C);
+  testTreeHash(S, M, N, C, b);
 
+  b = 1;
   C = (double) 10000*N;
-  testTreeHash(S, M, N, C);
+  testTreeHash(S, M, N, C, b);
 
   M = 100000;
   N = 100000;
@@ -154,45 +162,53 @@ int main(){
   std::cout << "M,N = 10^5 " << std::endl;
 
   C = (double) N;
-  testTreeHash(S, M, N, C);
+  b = 100;
+  testTreeHash(S, M, N, C, b);
 
   C = (double) 10*N;
-  testTreeHash(S, M, N, C);
+  b = 100;
+  testTreeHash(S, M, N, C, b);
 
   C = (double) 100*N;
-  testTreeHash(S, M, N, C);
+  b = 17;
+  testTreeHash(S, M, N, C, b);
 
   C = (double) 1000*N;
-  testTreeHash(S, M, N, C);
+  b = 2;
+  testTreeHash(S, M, N, C, b);
 
   C = (double) 10000*N;
-  testTreeHash(S, M, N, C);
+  b = 1;
+  testTreeHash(S, M, N, C, b);
 
   C = (double) 100000*N;
-  testTreeHash(S, M, N, C);
+  b = 1;
+  testTreeHash(S, M, N, C, b);
 
   M = 1000000;
   N = 1000000;
   //M,N = 10^6
   std::cout << "M,N = 10^6 " << std::endl;
   C = (double) N;
-  testTreeHash(S, M, N, C);
+  b = 100;
+  testTreeHash(S, M, N, C, b);
 
   C = (double) N*10;
-  testTreeHash(S, M, N, C);
+  b = 100;
+  testTreeHash(S, M, N, C, b);
 
   C = (double) N*100;
-  testTreeHash(S, M, N, C);
+  testTreeHash(S, M, N, C, b);
 
   C = (double) N*1000;
-  testTreeHash(S, M, N, C);
+  testTreeHash(S, M, N, C, b);
 
   C = (double) N*10000;
-  testTreeHash(S, M, N, C);
+  testTreeHash(S, M, N, C, b);
 
   C = (double) N*100000;
-  testTreeHash(S, M, N, C);
+  testTreeHash(S, M, N, C, b);
 
   C = (double) N*1000000;
-  testTreeHash(S, M, N, C);
+  testTreeHash(S, M, N, C, b);
 }
