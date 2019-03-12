@@ -11,5 +11,5 @@ main.o: main.cpp
 treeHash.o: treeHash.cpp
 	g++ -std=c++11 -c treeHash.cpp
 
-treeNode.0: treeNode.cpp
+treeNode.o: treeNode.cpp
 	g++ -std=c++11 -c treeNode.cpp
