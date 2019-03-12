@@ -66,13 +66,12 @@ void TreeHash::hash(std::vector<TreeHash::bitvec>& X,
                int b){
 
     //Hash with b bands, the number of permutations of the strings to use.
-    for(int i = 0; i < b; i++){
 
-      std::vector<int> perm = std::vector<int>(S, 0);
-      for(int j = 0; j < S; j++){
-        perm[j] = j;
-      }
-      std::random_shuffle(perm.begin(), perm.end());
+    std::vector<int>* perm = new std::vector<int>(S, 0);
+    for(int j = 0; j < S; j++){
+      (*perm)[j] = j;
+    }
+    for(int i = 0; i < b; i++){
 
       for(int k = 0; k < X.size(); k++){
         X[k].perm = perm;
@@ -80,7 +79,7 @@ void TreeHash::hash(std::vector<TreeHash::bitvec>& X,
       for(int k = 0; k < Y.size(); k++){
         Y[k].perm = perm;
       }
-
+      std::random_shuffle(perm->begin(), perm->end());
       //Sort X, Y - according to the current permutation, see bitvec operator < for details
       std::sort(X.begin(), X.end());
       std::sort(Y.begin(), Y.end());
@@ -96,19 +95,19 @@ void TreeHash::hash(std::vector<TreeHash::bitvec>& X,
     }
 }
 
-void TreeHash::hashRecursive(TreeNode* node, 
-                const std::vector<TreeHash::bitvec>& X, 
+void TreeHash::hashRecursive(TreeNode* node,
+                const std::vector<TreeHash::bitvec>& X,
                 const std::vector<TreeHash::bitvec>& Y,
-                std::vector<TreeHash::bitvec>::iterator X_begin, 
+                std::vector<TreeHash::bitvec>::iterator X_begin,
                 std::vector<TreeHash::bitvec>::iterator X_end,
                 std::vector<TreeHash::bitvec>::iterator Y_begin,
-                std::vector<TreeHash::bitvec>::iterator Y_end,  
+                std::vector<TreeHash::bitvec>::iterator Y_end,
                 std::vector<std::vector<TreeHash::bitvec>>* bucketsX,
                 std::vector<std::vector<TreeHash::bitvec>>* bucketsY,
                 int index,
-                std::vector<int> indexPerm) {
+                std::vector<int>* indexPerm) {
 
-    int stringIndex = indexPerm[index];
+    int stringIndex = (*indexPerm)[index];
     //std::cout << "hashRecursive X(" <<  X_begin-X.begin()  <<  " , " << X_end-X.begin()
     //         << ") Y(" << Y_begin - Y.begin() << " , " << Y_end - Y.begin() << ") " << stringIndex << std::endl;
     //Base cases, bucket or reject:
@@ -122,14 +121,14 @@ void TreeHash::hashRecursive(TreeNode* node,
         bucketsX->push_back(x);
         bucketsY->push_back(y);
         return;
-    }     
+    }
     if(node->isReject){
         return;
     }
     if(stringIndex >= X[0].vec.size()){
         //std::cout << "Error string len exceeded " << std::endl;
         return;
-    } 
+    }
 
     //auto X_mid = X_begin;
     //auto Y_mid = Y_begin;
@@ -160,7 +159,7 @@ void TreeHash::hashRecursive(TreeNode* node,
     }*/
 
     //For each child, recurse using X0, X1, Y0, Y1 if data points remain
-    if(X_begin != X_mid && Y_begin != Y_mid){        
+    if(X_begin != X_mid && Y_begin != Y_mid){
         hashRecursive(node->child[0][0], X, Y, X_begin, X_mid, Y_begin, Y_mid,
                       bucketsX, bucketsY, index+1, indexPerm);
     }
@@ -171,9 +170,9 @@ void TreeHash::hashRecursive(TreeNode* node,
     if(X_end != X_mid && Y_begin != Y_mid){
         hashRecursive(node->child[1][0], X, Y, X_mid, X_end, Y_begin, Y_mid,
                       bucketsX, bucketsY, index+1, indexPerm);
-    } 
+    }
     if(X_end != X_mid && Y_end != Y_mid){
-        hashRecursive(node->child[1][1], X, Y, X_mid, X_end, Y_mid, Y_end, 
+        hashRecursive(node->child[1][1], X, Y, X_mid, X_end, Y_mid, Y_end,
                       bucketsX, bucketsY, index+1, indexPerm);
     }
 }

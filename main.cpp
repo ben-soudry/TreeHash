@@ -6,6 +6,7 @@
 #include <math.h>
 #include <chrono>
 #include <memory>
+#include <unordered_map>
 void testTreeHash(int S, int M, int N, double C, int b){
   std::cout << "========================================================"<< std::endl;
   std::cout << "Testing TreeHash with S = " << S << " N = " << N << " C = " << C << " b = " << b << std::endl;
@@ -92,12 +93,17 @@ void testTreeHash(int S, int M, int N, double C, int b){
   int matchedPairs = 0;
   int unmatchedPairs = 0;
   //Check all pairs in each bucket for matches:
+  std::unordered_map<int, bool> visited;
+
   for(int i = 0; i < (*bucketsX).size(); i++){
     //compare all pairs in the ith bucket
     for(int j = 0; j < (*bucketsX)[i].size(); j++){
       for(int k = 0; k < (*bucketsY)[i].size(); k++){
         if((*bucketsX)[i][j].id == (*bucketsY)[i][k].id){
-          matchedPairs += 1;
+            if(visited.find((*bucketsX)[i][j].id) == visited.end()){
+                visited.insert(std::make_pair((*bucketsX)[i][j].id, true));
+                matchedPairs += 1;
+            }
         } else {
           unmatchedPairs += 1;
         }
@@ -138,17 +144,17 @@ int main(){
 
   C = (double) N;
   b = 100;
-  testTreeHash(S, M, N, C, b);
+  //testTreeHash(S, M, N, C, b);
 
   C = (double) 10*N;
   b = 100;
-  testTreeHash(S, M, N, C, b);
+  //testTreeHash(S, M, N, C, b);
 
   C = (double) 100*N;
-  b = 37;
+  b = 42;
   testTreeHash(S, M, N, C, b);
 
-  b = 2;
+  b = 3;
   C = (double) 1000*N;
   testTreeHash(S, M, N, C, b);
 
@@ -163,11 +169,11 @@ int main(){
 
   C = (double) N;
   b = 100;
-  testTreeHash(S, M, N, C, b);
+  //testTreeHash(S, M, N, C, b);
 
   C = (double) 10*N;
   b = 100;
-  testTreeHash(S, M, N, C, b);
+  //testTreeHash(S, M, N, C, b);
 
   C = (double) 100*N;
   b = 17;

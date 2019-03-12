@@ -13,7 +13,7 @@
 #define TREEHASH_TREEHASH_H
 #endif //TREEHASH_TREEHASH_H
 
-class TreeHash 
+class TreeHash
 {
     public:
 
@@ -21,18 +21,21 @@ class TreeHash
     typedef struct bitvec{
         int id;
         std::vector<bool> vec;
-        std::vector<int> perm;
+        std::vector<int>* perm;
         bool operator < (const struct bitvec& other) const{
           for(int i = 0; i < this->vec.size(); ++i){
-            if(this->vec[perm[i]] < other.vec[perm[i]]){
+            if(this->vec[(*perm)[i]] < other.vec[(*perm)[i]]){
               return true;
             }
-            if(this->vec[perm[i]] > other.vec[perm[i]]){
+            if(this->vec[(*perm)[i]] > other.vec[(*perm)[i]]){
               return false;
             }
           }
           //The vectors are equal
           return false;
+        }
+        ~bitvec(){
+            delete perm;
         }
     } bitvec;
 
@@ -53,14 +56,14 @@ class TreeHash
     //The elements of P are P(x_i,y_i) in 2x2 matricies
     const TreeHash::prob P_xy;
     TreeHash::prob Q_xy;
-    
+
     uint64_t numBuckets;
 
 
     private:
 
     void constructTree(TreeNode* node, int i);
-    
+
     void hashRecursive(TreeNode* node,
                        const std::vector<TreeHash::bitvec>& X,
                        const std::vector<TreeHash::bitvec>& Y,
@@ -71,10 +74,10 @@ class TreeHash
                        std::vector<std::vector<TreeHash::bitvec>>* bucketsX,
                        std::vector<std::vector<TreeHash::bitvec>>* bucketsY,
                        int index,
-                       std::vector<int> indexPerm);
+                       std::vector<int>* indexPerm);
 
 
-    
+
     TreeNode* root;
     uint64_t currBucketId;
 };
