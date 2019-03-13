@@ -23,6 +23,10 @@ class TreeHash
         std::vector<bool> vec;
         std::vector<int>* perm;
         bool operator < (const struct bitvec& other) const{
+          //std::cout << "perm: " << perm << std::endl;
+          //std::cout << "perm len: " << perm->size() << " vec len: " << vec.size() << std::endl;
+          //std::cout << "perm[0] " << (*perm)[0] << std::endl;
+
           for(int i = 0; i < this->vec.size(); ++i){
             if(this->vec[(*perm)[i]] < other.vec[(*perm)[i]]){
               return true;
@@ -34,9 +38,7 @@ class TreeHash
           //The vectors are equal
           return false;
         }
-        ~bitvec(){
-            delete perm;
-        }
+
     } bitvec;
 
     TreeHash(double C, int S, int M, int N, const TreeHash::prob& P_xy);

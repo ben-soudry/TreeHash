@@ -68,9 +68,12 @@ void TreeHash::hash(std::vector<TreeHash::bitvec>& X,
     //Hash with b bands, the number of permutations of the strings to use.
 
     std::vector<int>* perm = new std::vector<int>(S, 0);
+
+
     for(int j = 0; j < S; j++){
       (*perm)[j] = j;
     }
+
     for(int i = 0; i < b; i++){
 
       for(int k = 0; k < X.size(); k++){
@@ -81,6 +84,7 @@ void TreeHash::hash(std::vector<TreeHash::bitvec>& X,
       }
       std::random_shuffle(perm->begin(), perm->end());
       //Sort X, Y - according to the current permutation, see bitvec operator < for details
+      //std::cout << "theperm: "<< perm << std::endl;
       std::sort(X.begin(), X.end());
       std::sort(Y.begin(), Y.end());
 
@@ -91,8 +95,8 @@ void TreeHash::hash(std::vector<TreeHash::bitvec>& X,
 
       //Start hashing recursively
       this->hashRecursive(this->root, X, Y, X_begin, X_end, Y_begin, Y_end, bucketsX, bucketsY, 0, perm);
-
     }
+    delete perm;
 }
 
 void TreeHash::hashRecursive(TreeNode* node,
