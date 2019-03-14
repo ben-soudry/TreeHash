@@ -22,6 +22,7 @@ TreeHash::TreeHash(double C, int S, int M, int N, const TreeHash::prob& P_xy)
     //Start hashing recursively
     constructTree(root, 0);
     std::cout << "Finished constructing tree" << std::endl;
+    std::cout << "Probability Sum: " << bucketProbSum << std::endl;
     numBuckets = currBucketId;
 }
 TreeHash::~TreeHash(){
