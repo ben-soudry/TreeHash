@@ -66,7 +66,7 @@ void testTreeHash(int S, int N, double C, int b){
   P_xy[1] = {{0.255, 0.5275}};
 
 
-  TreeHash* treeHash = new TreeHash(C, S, M, N, P_xy);
+  TreeHash* treeHash = new TreeHash(C, S, N, P_xy);
 
   auto constructionTime = std::chrono::system_clock::now();
   std::chrono::duration<double> construction_seconds = constructionTime-startTime;
@@ -151,20 +151,22 @@ void testBruteForce(int S, int N){
 
   auto bruteForceStartTime = std::chrono::system_clock::now();
 
+
+ std::cout << "Starting Brute Force" << std::endl;
   for(int i = 0; i < N; i++){
     for(int j = 0; j < N; j++){
       double matchProb = 1.0;
       for(int k = 0; k < S; k++){
-        if((*X)[i][k] == 0 && (*Y)[i][k] == 0){
+        if((*X)[i].vec[k] == 0 && (*Y)[i].vec[k] == 0){
           matchProb *= P_xy[0][0];
         }
-        else if((*X)[i][k] == 0 && (*Y)[i][k] == 1){
+        else if((*X)[i].vec[k] == 0 && (*Y)[i].vec[k] == 1){
             matchProb *= P_xy[0][1];
         }
-        else if((*X)[i][k] == 1 && (*Y)[i][k] == 0){
+        else if((*X)[i].vec[k] == 1 && (*Y)[i].vec[k] == 0){
           matchProb *= P_xy[1][0];
         }
-        else if((*X)[i][k] == 1 && (*Y)[i][k] == 1){
+        else if((*X)[i].vec[k] == 1 && (*Y)[i].vec[k] == 1){
           matchProb *= P_xy[1][1];
         }
       }
@@ -181,13 +183,17 @@ void testBruteForce(int S, int N){
 
 
 int main(){
-  int S = 2000;
+  int S = 20; //2000;
   int N = 10000;
   double C;
   int b;
 
+
+  //testBruteForce(10, N);
+
   //M,N = 10^4
   std::cout << "M,N = 10^4 " << std::endl;
+  testBruteForce(S, N);
 
   C = (double) N;
   b = 100;
@@ -198,7 +204,7 @@ int main(){
   //testTreeHash(S, N, C, b);
 
   C = (double) 100*N;
-  b = 42;
+  b = 37;
   testTreeHash(S, N, C, b);
 
   b = 3;
@@ -212,6 +218,8 @@ int main(){
   N = 100000;
   //M,N = 10^5
   std::cout << "M,N = 10^5 " << std::endl;
+
+  testBruteForce(S, N);
 
   C = (double) N;
   b = 100;
@@ -239,7 +247,10 @@ int main(){
 
   N = 1000000;
   //M,N = 10^6
+
   std::cout << "M,N = 10^6 " << std::endl;
+  testBruteForce(S, N);
+
   C = (double) N;
   b = 100;
   testTreeHash(S, N, C, b);

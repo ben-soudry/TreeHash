@@ -41,7 +41,7 @@ class TreeHash
 
     } bitvec;
 
-    TreeHash(double C, int S, int M, int N, const TreeHash::prob& P_xy);
+    TreeHash(double C, int S, int N, const TreeHash::prob& P_xy);
     ~TreeHash();
 
     void hash(std::vector<bitvec>& X, std::vector<TreeHash::bitvec>& Y,
@@ -50,8 +50,7 @@ class TreeHash
 
     double C; //bucket cutoff parameter
     int S; //length of the bit strings
-    int M; //Number of Xs
-    int N; //Number of Ys
+    int N; //Number of Xs/ Ys
 
     double bucketProbSum;
 

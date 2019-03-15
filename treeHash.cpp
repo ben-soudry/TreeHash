@@ -1,7 +1,7 @@
 #include "treeHash.h"
 
-TreeHash::TreeHash(double C, int S, int M, int N, const TreeHash::prob& P_xy)
- : C(C), S(S), N(N), M(M), P_xy(P_xy){
+TreeHash::TreeHash(double C, int S, int N, const TreeHash::prob& P_xy)
+ : C(C), S(S), N(N), P_xy(P_xy){
 
     //Calculate Q_xy - assumes, x, y distributed independently
     this->Q_xy[0][0] = (P_xy[0][0]+P_xy[0][1])*(P_xy[0][0]+P_xy[1][0]);
@@ -43,7 +43,7 @@ void TreeHash::constructTree(TreeNode* node, int i)
                  //Prune the tree here, TreeHash::probability is too low
                  //std::cout << "Prune! " << std::endl;
                  childNode->isReject = true;
-             } else if(1+M*N*node->Q_xy < C*node->P_xy || i == S) {
+             } else if(1+N*N*node->Q_xy < C*node->P_xy || i == S) {
                 //Make a bucket
                 //std::cout << "Bucket " << currBucketId << std::endl;
                 childNode->isBucket = true;
